@@ -19,10 +19,19 @@ package org.webik.mojo.storm;
  * under the License.
  */
 
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.commons.lang.StringUtils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 
-import java.io.File;
+import com.google.common.base.Strings;
+
+import backtype.storm.Config;
+import backtype.storm.StormSubmitter;
+import backtype.storm.utils.Utils;
 
 /**
  * Goal which touches a timestamp file.
@@ -35,15 +44,25 @@ import java.io.File;
 public class JarDeployMojo
     extends AbstractMojo
 {
+    
     /**
-     * Location of the file.
-     * @parameter expression="${project.build.directory}"
-     * @required
+     * Topology jar
+     * 
+     * @parameter expression="${storm.localJar}"
      */
-    private File outputDirectory;
+	private String localJar;
 
     public void execute() throws MojoExecutionException
     {
-        //backtype.storm.command.activate.main();
+        @SuppressWarnings("rawtypes")
+		Map conf = Utils.readStormConfig();
+        
+        Set<Object> args = new HashSet<Object>();
+        //args.addAll( null );
+        args.add( conf.get( Config.NIMBUS_HOST ) );
+        args.add( conf.get( Config.NIMBUS_THRIFT_PORT ) );
+		args.add(  StormSubmitter.submitJar( conf , localJar ) );
+		
+		String cmd = StringUtils.join( args.toArray(), " ");
     }
 }
