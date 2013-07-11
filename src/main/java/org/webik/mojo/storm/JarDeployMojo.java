@@ -19,15 +19,13 @@ package org.webik.mojo.storm;
  * under the License.
  */
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
-
-import com.google.common.base.Strings;
 
 import backtype.storm.Config;
 import backtype.storm.StormSubmitter;
@@ -51,18 +49,32 @@ public class JarDeployMojo
      * @parameter expression="${storm.localJar}"
      */
 	private String localJar;
+	private String stormConfFile = null;
 
     public void execute() throws MojoExecutionException
     {
-        @SuppressWarnings("rawtypes")
+    	System.setProperty( "storm.conf.file", stormConfFile  );
+    	System.setProperty( "storm.options", getStormOptions()  );
+        
+    	@SuppressWarnings("rawtypes")
 		Map conf = Utils.readStormConfig();
         
         Set<Object> args = new HashSet<Object>();
-        //args.addAll( null );
+        args.add( "java" );
+        args.add( "-client" );
         args.add( conf.get( Config.NIMBUS_HOST ) );
         args.add( conf.get( Config.NIMBUS_THRIFT_PORT ) );
 		args.add(  StormSubmitter.submitJar( conf , localJar ) );
 		
-		String cmd = StringUtils.join( args.toArray(), " ");
+		try {
+			Runtime.getRuntime().exec( (String[]) args.toArray() );
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
     }
+
+	private String getStormOptions() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
