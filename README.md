@@ -1,4 +1,4 @@
 storm-maven-plugin
 ==================
 
-Mavn plugin to deploy and manage storm topologies
+Maven plugin to deploy and manage storm topologies
